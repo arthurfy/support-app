@@ -8,6 +8,9 @@ pysimplegui
 sqlite
 requests
 
+# Features
+- basic authenication system
+
 # Usage
 replit.com/@arthurfy/customerdata
 
