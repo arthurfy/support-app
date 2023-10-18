@@ -1,15 +1,21 @@
-import logging, os, sys
+import logging
+import os
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
-
-sys.path.append(os.getcwd())
-from components import import_csv, common, gui, login, prep_data
+from pandasql import sqldf
+from datetime import datetime, timedelta
+from components.import_csv import import_csv
+from components.common import common
+from components.gui import gui
+from components.login import login
+from components.prep_data import prep_data
+from components.visualise_data import visualise_data
+from pandasql import sqldf
 
 logger = common.logger
-
-logger.info("The application is running")
 
 
 def section_collapse(layout, key, visible: bool = False):
@@ -32,26 +38,28 @@ def setup_database():
 
 setup_database()
 
-# sg.theme('DarkAmber')  # Add a touch of color
-
 menu_right_click = ['&Right', ['&Copy', '&Paste', '&Properties']]
 
-main_menu = [['&File', ['&Exit']], ['&Import', ['&API']],
-             ['&View', ['&Customers', '&Orders', '&Products']],
+main_menu = [['&File', ['&Exit']], ['&View', ['&Dashboard']],
              ['&Help', ['&About']]]
 
 main_layout = [
     [sg.Menu(main_menu, key='-MENU-')],
-    [section_collapse(gui.login_layout, '-LAYOUT-LOGIN-', False)],
-    [section_collapse(gui.home_layout, '-LAYOUT-HOME-', True)],
+    [section_collapse(gui.login_layout, '-LAYOUT-LOGIN-', True)],
+    [section_collapse(gui.home_layout, '-LAYOUT-HOME-', False)],
+    [sg.Canvas(key='-CANVAS-')],
+    [sg.Exit()],
 ]
 
 # Create the Window
-window = sg.Window('Data Application',
-                   main_layout,
-                   right_click_menu=menu_right_click,
-                   use_default_focus=False,
-                   element_justification='c')
+window = sg.Window(
+    'Data Application',
+    main_layout,
+    right_click_menu=menu_right_click,
+    use_default_focus=False,
+    finalize=True,
+    element_justification='c',
+)
 
 customer_order_data = None
 # Event Loop to process "events" and get the "values" of the inputs
@@ -63,23 +71,41 @@ while True:
     password = values["-LOGIN-PASSWORD-"]
 
     if username != "" and password != "":
-      if login.login(username, password):
+      if login(username, password):
 
         window['-LAYOUT-HOME-'].update(visible=True)
         window['-LAYOUT-LOGIN-'].update(visible=False)
+
         login.logged_in = True
-        customer_order_data = prep_data.customer_orders()
-        logger.info(f"customer_order_data: {customer_order_data})")
+        '''
+        ON LOGIN, LOAD FIRST GRAPH
+        '''
 
-        dataSize = 1000
+        # load customer order data
+        customer_orders = prep_data.customer_orders()
 
-        # Make synthetic data:
-        xData = np.random.randint(100, size=dataSize)
-        yData = np.linspace(0, dataSize, num=dataSize, dtype=int)
+        # limit records
+        customer_orders = customer_orders.head(100)
+        '''
+        FILTE BY CUSTOMER ORDERS (DEV)
+        '''
 
-        # Make and show plot
-        plt.plot(xData, yData, '.k')
-        plt.show()
+        # # filter customer orders by the last 12 months
+        # today = datetime.date(datetime.now())
+        # last_12_months = today - timedelta(days=365)
+        # filter_query = f"""
+        # SELECT * FROM customer_orders
+        # where OrderDate >= {last_12_months}
+        # """
+        # customers_orders = sqldf(filter_query)
+
+        customer_ids = customer_orders["CustomerID"].tolist()
+        product_ids = customer_orders["ProductID"].tolist()
+
+        visualise_data.draw_figure(
+            window['-CANVAS-'].TKCanvas,
+            visualise_data.create_scatter_graph(customer_ids, product_ids,
+                                                "Customers VS Products"))
 
       else:
         sg.popup_ok("The username or password is incorrect")
