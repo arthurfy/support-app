@@ -9,7 +9,7 @@ sqlite
 requests
 
 # Features
-- basic authenication system
+- basic authentication system
 
 # Usage
 https://replit.com/@arthurfy/desktopappexample
