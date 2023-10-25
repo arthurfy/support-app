@@ -1,5 +1,5 @@
 # About The Project
-A desktop application with a basic authentication system for users to visualise and explore customer data.
+template desktop application with pandas, sql, pysimplegui
 
 # Built With
 pandas
@@ -12,10 +12,7 @@ requests
 - basic authenication system
 
 # Usage
-replit.com/@arthurfy/customerdata
-
-# Roadmap
-- add dashboards for products, orders and customers
+https://replit.com/@arthurfy/desktopappexample
 
 # Contact
 p.butler@live.co.uk
