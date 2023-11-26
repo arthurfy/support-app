@@ -9,11 +9,7 @@ sqlite
 requests
 
 # Features
-- basic authentication system
-
 # Usage
-https://replit.com/@arthurfy/desktopappexample
 
-# Contact
-p.butler@live.co.uk
+
 

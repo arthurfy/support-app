@@ -4,12 +4,12 @@ import pandas as pd
 from pandasql import sqldf
 
 try:
-  from components.import_csv.import_csv import import_csv_to_dataframe
-  from components.common.common import logger, CUSTOMERS, ORDERS, ORDER_DETAILS, PRODUCTS
+  from components import import_csv_to_dataframe
+  from components import logger, CUSTOMERS, ORDERS, ORDER_DETAILS, PRODUCTS
 except ModuleNotFoundError:
   sys.path.append(os.getcwd())
-  from components.import_csv.import_csv import import_csv_to_dataframe
-  from components.common.common import logger, CUSTOMERS, ORDERS, ORDER_DETAILS, PRODUCTS
+  from components import import_csv_to_dataframe
+  from components import logger, CUSTOMERS, ORDERS, ORDER_DETAILS, PRODUCTS
 
 
 def customer_orders() -> pd.DataFrame:

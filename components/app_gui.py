@@ -5,17 +5,14 @@ import logging
 import pandas as pd
 import PySimpleGUI as sg
 from datetime import datetime, timedelta
-from components.common import common
-from components.import_api import import_api
+from components import connect_api
 '''
-a module for GUI components
+the application gui components
 '''
-
-
 def open_target_dataframe_to_window(target_dataframe: pd.DataFrame):
   '''
-        load the dataframe into a viewer
-        '''
+  load the dataframe into a viewer
+  '''
 
   headings = list(target_dataframe.columns)
   values = target_dataframe.values.tolist()
@@ -46,7 +43,6 @@ def open_target_dataframe_to_window(target_dataframe: pd.DataFrame):
       break
 
   window.close()
-
 
 def open_api_to_window(api_url: str = None):
   '''
@@ -87,10 +83,10 @@ def open_api_to_window(api_url: str = None):
       try:
         user_api_url = values['-API-REQUEST-URL-']
         if user_api_url != None and user_api_url != "":
-          api_headers = import_api.api_standard()
-          api_request = import_api.api_request(user_api_url,
+          api_headers = connect_api.api_standard()
+          api_request = connect_api.api_request(user_api_url,
                                                headers=api_headers)
-          api_response = import_api.api_response_to_dataframe(api_request)
+          api_response = connect_api.api_response_to_dataframe(api_request)
           api_url_response_data.update(api_response.to_string())
       except Exception as e:
         sg.popup_error(f"Error: {e}\nUnable to retrieve data from API")
@@ -100,27 +96,10 @@ def open_api_to_window(api_url: str = None):
 
   window.close()
 
+'''
+LOGIN LAYOUT
+'''
 
-# GUI COMPONENTS
-# notes_listbox = sg.Listbox(values=common.get_list_of_files_in_directory(
-#     common.WORKSPACE_FOLDER),
-#                            key="-WORKSPACE-FILES-",
-#                            size=(20, 19))
-# notes_large_text = sg.Multiline(key='notes_large_text', size=(100, 20))
-
-# workspace_load_file_button = sg.Button("Load File",
-#                                        key="-WORKSPACE-LOAD-FILE-",
-#                                        size=(10, 1))
-
-dash_products = sg.Button('Products', key='-DASH-PRODUCTS-', size=(10, 1))
-dash_orders = sg.Button('Orders', key='-DASH-ORDERS-', size=(10, 1))
-dash_customers = sg.Button('Customers', key='-DASH-CUSTOMERS-', size=(10, 1))
-
-home_layout = [
-    [dash_products, dash_orders, dash_customers],
-]
-
-# LOGIN LAYOUT
 login_text = sg.Text("Login", size=(20, 1))
 login_username_input = sg.InputText("admin",
                                     key='-LOGIN-USERNAME-',
@@ -136,3 +115,74 @@ login_layout = [
     [login_password_input],
     [login_button],
 ]
+
+# GUI COMPONENTS
+# notes_listbox = sg.Listbox(values=common.get_list_of_files_in_directory(
+#     common.WORKSPACE_FOLDER),
+#                            key="-WORKSPACE-FILES-",
+#                            size=(20, 19))
+# notes_large_text = sg.Multiline(key='notes_large_text', size=(100, 20))
+
+
+
+
+'''
+HOME LAYOUT
+'''
+
+customer_listbox = sg.Listbox(values=[], key="-CUSTOMERS-LIST-", size=(40, 10))
+customer_search = sg.InputText('search customers',font=('Arial Bold', 12),  expand_x=True, enable_events=True,  readonly=False, size=(32,1), key='-CUSTOMER-SEARCH-')
+
+
+customer_layout = [
+  [customer_search],
+  [customer_listbox],
+]
+
+'''
+DASHBOARD LAYOUT
+'''
+
+'''
+
+# LOAD CANVAS
+
+# load customer order data
+# customer_orders = prep_data.customer_orders()
+
+# # limit records
+# customer_orders = customer_orders.head(100)
+
+# customer_ids = customer_orders["CustomerID"].tolist()
+# product_ids = customer_orders["ProductID"].tolist()
+
+# visualise_data.draw_figure(
+#     window['-CANVAS-'].TKCanvas,
+#     visualise_data.create_scatter_graph(customer_ids, product_ids,
+#                                         "Customers VS Products"))
+
+'''
+
+dash_products = sg.Button('Products', key='-DASH-PRODUCTS-', size=(10, 1))
+dash_orders = sg.Button('Orders', key='-DASH-ORDERS-', size=(10, 1))
+dash_customers = sg.Button('Customers', key='-DASH-CUSTOMERS-', size=(10, 1))
+
+dash_layout = [
+    [dash_products, dash_orders, dash_customers],
+     # [sg.Canvas(key='-CANVAS-')],
+]
+
+'''
+HOME LAYOUT
+'''
+
+
+home_button = sg.Button("Home", key="-HOME-BUTTON-",size=(10, 1))
+home_guide_text = sg.Multiline(key='-HOME-GUIDE-TEXT', size=(100, 20))
+
+home_layout = [
+  [home_guide_text],
+]
+
+
+

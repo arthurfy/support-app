@@ -9,7 +9,8 @@ import ssl
 import hashlib
 import pandas as pd
 from urllib3 import poolmanager
-from components.common import common
+
+from components import common
 
 logger = common.logger
 '''

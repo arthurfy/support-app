@@ -1,9 +1,14 @@
 import os
+import sys
 import pandas as pd
-from components.common import common
+
+try:
+  from components import common
+except ModuleNotFoundError:
+  sys.path.append(os.getcwd())
+  from components import common
 
 logger = common.logger
-
 
 def import_excel_to_dataframe(file_path: str,
                               target_sheet: str = None) -> pd.DataFrame:
@@ -47,3 +52,8 @@ def import_excel_to_dataframe(file_path: str,
     logger.error(f'import_excel_to_dataframe error: {error}')
 
     return None
+
+if __name__ == "__main__":
+
+  customer_data = import_excel_to_dataframe()
+  pass
