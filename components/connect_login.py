@@ -8,7 +8,6 @@ logger = common.logger
 # create login state
 logged_in = False
 
-
 # create a new sqlite database
 def create_database():
   conn = sqlite3.connect('login.db')

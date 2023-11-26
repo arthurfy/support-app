@@ -136,31 +136,12 @@ customer_search = sg.InputText('search customers',font=('Arial Bold', 12),  expa
 
 customer_layout = [
   [customer_search],
-  [customer_listbox],
+  # [customer_listbox],
+  [sg.Canvas(key='-CUSTOMERS-CANVAS-')],
 ]
 
 '''
 DASHBOARD LAYOUT
-'''
-
-'''
-
-# LOAD CANVAS
-
-# load customer order data
-# customer_orders = prep_data.customer_orders()
-
-# # limit records
-# customer_orders = customer_orders.head(100)
-
-# customer_ids = customer_orders["CustomerID"].tolist()
-# product_ids = customer_orders["ProductID"].tolist()
-
-# visualise_data.draw_figure(
-#     window['-CANVAS-'].TKCanvas,
-#     visualise_data.create_scatter_graph(customer_ids, product_ids,
-#                                         "Customers VS Products"))
-
 '''
 
 dash_products = sg.Button('Products', key='-DASH-PRODUCTS-', size=(10, 1))
@@ -169,7 +150,6 @@ dash_customers = sg.Button('Customers', key='-DASH-CUSTOMERS-', size=(10, 1))
 
 dash_layout = [
     [dash_products, dash_orders, dash_customers],
-     # [sg.Canvas(key='-CANVAS-')],
 ]
 
 '''
@@ -178,7 +158,7 @@ HOME LAYOUT
 
 
 home_button = sg.Button("Home", key="-HOME-BUTTON-",size=(10, 1))
-home_guide_text = sg.Multiline(key='-HOME-GUIDE-TEXT', size=(100, 20))
+home_guide_text = sg.Multiline("guide text here", key='-HOME-GUIDE-TEXT', size=(100, 20))
 
 home_layout = [
   [home_guide_text],

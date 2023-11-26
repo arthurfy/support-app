@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 from pandasql import sqldf
 from datetime import datetime, timedelta
-
 from components import common
 from components import app_gui
 from components import connect_login
@@ -55,7 +54,7 @@ def app():
 
     menu_right_click = ['&Right', ['&Copy', '&Paste', '&Properties']]
 
-    main_menu = [['&File', ['&Exit']], ['&Function', ['&Guide','&Customers']],
+    main_menu = [['&File', ['&Exit']], ['&Function', ['&Customers']],
                 ['&Help', ['&About']]]
 
     main_layout = [
@@ -117,6 +116,19 @@ def app():
           window['-LAYOUT-HOME-'].update(visible=False)
           window['-LAYOUT-LOGIN-'].update(visible=False)
           window['-LAYOUT-CUSTOMER-'].update(visible=True)
+
+          # load customer order data
+          customer_orders = prep_data.customer_orders()
+
+          products = prep_data.dash_products(customer_orders)
+
+          product_ids = products["ProductID"].tolist()
+          orders = products["Orders"].tolist()
+
+          visualise_data.draw_figure(
+              window['-CUSTOMERS-CANVAS-'].TKCanvas,
+              visualise_data.create_plot_graph(product_ids, orders,
+                                                  "Top Products", "Product ID", "Orders"))
           
         else:
           sg.popup(f"Please login")
