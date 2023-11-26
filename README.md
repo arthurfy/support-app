@@ -9,7 +9,9 @@ sqlite
 requests
 
 # Features
+- basic authenication system
+  
 # Usage
-
+python desktop application
 
 
