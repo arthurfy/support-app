@@ -1,9 +1,7 @@
 import sqlite3
 import logging
 import hashlib
-import sys
-import os
-from components.common import common
+from components import common
 
 logger = common.logger
 

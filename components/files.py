@@ -1,39 +1,33 @@
 import os
 import sys
-import logging
-import datetime
+import shutil
 
-# setup application logging
-logging.basicConfig(filemode='app.log',
-                    format='%(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from components import logger
 
-
-def application_path():
+def directory_get_files_listed(directory_path: str) -> list:
   '''
-  calculated the application path from switch it is running.
-  required when running from an executable
+  get a list of files from a directory
+
+  PARAMETERS
+  ----------
+  source_path : str
+
+  RETURNS
+  -------
+  list of files
   '''
-  if getattr(sys, 'frozen', False):
-    bundle_dir = sys._MEIPASS
-    return bundle_dir
-  else:
-    bundle_dir = os.getcwd()
-    return bundle_dir
 
+  # Check if the directory path exists
+  if not os.path.exists(directory_path):
+    logger.error("The directory path does not exist")
+    raise FileNotFoundError
 
-# Setup file paths
-APP_PATH = application_path()
-DATA_FOLDER = os.path.join(APP_PATH, "data")
-WORKSPACE_FOLDER = os.path.join(APP_PATH, "workspace")
-CUSTOMERS = os.path.join(DATA_FOLDER, 'customers.csv')
-ORDER_DETAILS = os.path.join(DATA_FOLDER, 'order_details.csv')
-ORDERS = os.path.join(DATA_FOLDER, 'orders.csv')
-PRODUCTS = os.path.join(DATA_FOLDER, 'products.csv')
+  # get the list of files
+  file_list = os.listdir(directory_path)
 
+  return None if len(file_list) == 0 else file_list
 
-def copy_list_of_files_from_source_to_destination(source_path: str,
+def directory_copy_files_listed_from_source_to_destination(source_path: str,
                                                   destination_path: str,
                                                   file_list: list):
   '''
@@ -69,31 +63,7 @@ def copy_list_of_files_from_source_to_destination(source_path: str,
       logger.error("The file was not copied to the destination path")
       raise FileNotFoundError
 
-
-def get_list_of_files_in_directory(directory_path: str) -> list:
-  '''
-    get a list of files from a directory
-
-    PARAMETERS
-    ----------
-    source_path : str
-
-    RETURNS
-    -------
-    list of files
-    '''
-  # check if the directory path exists
-  if not os.path.exists(directory_path):
-    logger.error("The directory path does not exist")
-    raise FileNotFoundError
-
-  # get the list of files
-  file_list = os.listdir(directory_path)
-
-  return file_list
-
-
-def open_directory_in_file_explorer(directory_path: str):
+def directory_open_in_file_explorer(directory_path: str):
   '''
     open the application directory in file explorer
 
@@ -112,8 +82,7 @@ def open_directory_in_file_explorer(directory_path: str):
   # os.startfile(directory_path)
   # disabled for replit
 
-
-def check_list_files_exist_in_directory(directory_path: str,
+def directory_check_files_listed_exist(directory_path: str,
                                         file_list: list) -> list:
   '''
   check if a list of files exist in a directory
@@ -147,8 +116,7 @@ def check_list_files_exist_in_directory(directory_path: str,
 
   return None if len(fetch_list) == 0 else fetch_list
 
-
-def check_list_files_last_modified_in_directory(directory_path: str,
+def directory_check_files_listed_last_modified(directory_path: str,
                                                 file_list: list,
                                                 last_modified: str = None
                                                 ) -> list:
@@ -170,6 +138,7 @@ def check_list_files_last_modified_in_directory(directory_path: str,
   if not os.path.exists(directory_path):
     logger.error("The directory path does not exist")
     raise FileNotFoundError
+  
 
   # check if the file list is empty
   if len(file_list) == 0:

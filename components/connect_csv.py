@@ -1,12 +1,11 @@
 import os
 import pandas as pd
-from components.common import common
+from components import common
 
 logger = common.logger
 
 # CSV ENCODING: "windows-1252"
 # CSV ENCODING: 'ISO-8859-1'
-
 
 def import_csv_to_dataframe(file_path: str,
                             encoding: str = None,
