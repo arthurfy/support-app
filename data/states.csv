@@ -1,0 +1,51 @@
+﻿ID,Code,Name,RegionID
+1,AK,Alaska,6
+2,AL,Alabama,2
+3,AR,Arkansas,9
+4,AZ,Arizona,4
+5,CA,California,6
+6,CO,Colorado,4
+7,CT,Connecticut,5
+8,DE,Delaware,7
+9,FL,Florida,7
+10,GA,Georgia,7
+11,HI,Hawaii,6
+12,IA,Iowa,8
+13,ID,Idaho,4
+14,IL,Illinois,1
+15,IN,Indiana,1
+16,KS,Kansas,8
+17,KY,Kentucky,2
+18,LA,Louisiana,9
+19,MA,Massachusetts,5
+20,MD,Maryland,7
+21,ME,Maine,5
+22,MI,Michigan,1
+23,MN,Minnesota,8
+24,MO,Missouri,8
+25,MS,Mississippi,2
+26,MT,Montana,4
+27,NC,North Carolina,7
+28,ND,North Dakota,8
+29,NE,Nebraska,8
+30,NH,New Hampshire,5
+31,NJ,New Jersey,3
+32,NM,New Mexico,4
+33,NV,Nevada,4
+34,NY,New York,3
+35,OH,Ohio,1
+36,OK,Oklahoma,9
+37,OR,Oregon,6
+38,PA,Pennsylvania,3
+39,RI,Rhode Island,5
+40,SC,South Carolina,7
+41,SD,South Dakota,8
+42,TN,Tennessee,2
+43,TX,Texas,9
+44,UT,Utah,4
+45,VA,Virginia,7
+46,VT,Vermont,5
+47,WA,Washington,6
+48,WI,Wisconsin,1
+49,WV,West Virginia,7
+50,WY,Wyoming,4
