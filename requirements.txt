@@ -1,0 +1,22 @@
+
+# Requirements
+matplotlib
+pandas
+pandasql
+PySimpleGUI
+requests
+
+# Reference for requirement specifiers.
+# docopt == 0.6.1
+# requests [security] >= 2.8.1, == 2.8.* ; python_version < "2.7"
+# urllib3 @ https://github.com/urllib3/urllib3/archive/refs/tags/1.26.8.zip
+
+# Reference to other requirement files or constraints files.
+# -r other-requirements.txt
+# -c constraints.txt
+
+# Reference to specific local distribution paths.
+# ./downloads/numpy-1.9.2-cp34-none-win32.whl
+
+# Reference to URLs.
+# http://example.org/builds/file_name_amd64.whl
