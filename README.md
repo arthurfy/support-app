@@ -16,4 +16,6 @@ requests
 # Usage
 Select functions from the top menu
 
+# customer data is not real #
+
 ![image](https://github.com/arthurfy/support-app/assets/96949660/cb61c831-b6c1-4a0a-80a8-1459be5a48f1)
