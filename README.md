@@ -15,5 +15,3 @@ requests
 
 # Usage
 Select functions from the top menu
-
-
