@@ -21,7 +21,6 @@ def draw_figure(canvas, figure):
   figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
   return figure_canvas_agg
 
-
 def create_plot_graph(x_plot,
                       y_plot,
                       title: str = None,
@@ -42,7 +41,12 @@ def create_plot_graph(x_plot,
   ------
   fig : matplotlib figure
   '''
+  # plt.figure(figsize=(4,2))
+  # plt.rcParams['figure.figsize'] = [4, 4]
+
   plt.plot(x_plot, y_plot, color='red', marker='o')
+
+  
 
   # if title is passed
   if title != None or title != "":
@@ -56,7 +60,6 @@ def create_plot_graph(x_plot,
 
   plt.grid(True)
   return plt.gcf()
-
 
 def create_scatter_graph(x_plot,
                          y_plot,

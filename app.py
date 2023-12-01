@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 from pandasql import sqldf
 from datetime import datetime, timedelta
-
 from components import common
 from components import app_gui
 from components import connect_login
+from components import connect_api
 from components import prep_data
 from components import visualise_data
 
@@ -36,6 +36,19 @@ def app():
     main application function
     '''
 
+    sg.theme("GrayGrayGray")
+
+    def login_check():
+      '''
+      check if the user is logged in
+      '''
+
+      if connect_login.logged_in == True:
+        return True
+      else:
+        sg.popup("Please login")
+        return False
+
     def section_collapse(layout, key, visible: bool = False):
       """
       Creates a simple gui column that can be later made hidden or visable
@@ -55,7 +68,7 @@ def app():
 
     menu_right_click = ['&Right', ['&Copy', '&Paste', '&Properties']]
 
-    main_menu = [['&File', ['&Exit']], ['&Function', ['&Guide','&Customers']],
+    main_menu = [['&File', ['&Exit']], ['&Function', ['&Customers','API']],
                 ['&Help', ['&About']]]
 
     main_layout = [
@@ -63,6 +76,7 @@ def app():
         [section_collapse(app_gui.login_layout, '-LAYOUT-LOGIN-', True)],
         [section_collapse(app_gui.home_layout, '-LAYOUT-HOME-', False)],
         [section_collapse(app_gui.customer_layout, '-LAYOUT-CUSTOMER-', False)],
+        [section_collapse(app_gui.api_layout, '-LAYOUT-API-', False)],
         [sg.Exit()],
     ]
 
@@ -82,7 +96,7 @@ def app():
       event, values = window.read()
 
       '''
-      INTIAL LOGIN SCREEN
+      LOGIN SCREEN
       '''
       if event == "-LOGIN-BUTTON-":
         username = values["-LOGIN-USERNAME-"]
@@ -106,23 +120,77 @@ def app():
           sg.popup("This is awesome!")
 
       '''
-      CUSTOMERS FUNCTION
+      FUNCTION - CUSTOMERS
       '''
       if event == "Customers":
-        
-        logger.info(f"main function - customers - event")
+        logger.info(f"{event}")
 
-        if connect_login.logged_in == True:
+        logged_in = login_check()
 
+        if logged_in:
+
+          # hide views
           window['-LAYOUT-HOME-'].update(visible=False)
           window['-LAYOUT-LOGIN-'].update(visible=False)
+          window['-LAYOUT-API-'].update(visible=False)
+
+          # show views
           window['-LAYOUT-CUSTOMER-'].update(visible=True)
+
+          # load customer order data
+          customer_orders = prep_data.customer_orders()
+
+          # calculate top products
+          products = prep_data.dash_products(customer_orders)
+
+          product_ids = products["ProductID"].tolist()
+          orders = products["Orders"].tolist()
+
+          visualise_data.draw_figure(
+              window['-CUSTOMERS-CANVAS-'].TKCanvas,
+              visualise_data.create_plot_graph(product_ids, orders,
+                                                  "Top Products", "Product ID", "Orders"))
           
-        else:
-          sg.popup(f"Please login")
+      if event == "API":
+        logger.info(f"{event}")
+        '''
+        FUNCTION - API
+        '''
+
+        logged_in = login_check()
+
+        if logged_in:
+
+          # hide views
+          window['-LAYOUT-HOME-'].update(visible=False)
+          window['-LAYOUT-LOGIN-'].update(visible=False)
+          window['-LAYOUT-CUSTOMER-'].update(visible=False)
+
+          # show views
+          window['-LAYOUT-API-'].update(visible=True)
+
+      if event == "-FUNCTION-API-REQUEST-BUTTON-": 
+          logger.info(f"{event}")
+          
+          try:
+            user_api_url = values['-FUNCTION-API-REQUEST-URL-']
+
+            if user_api_url == None:
+              continue
+
+            if user_api_url == "":
+              continue
+
+            api_response = connect_api.api_request(user_api_url)
+            api_response_formatted = connect_api.api_response_converter(api_response, "json")
+
+            app_gui.function_api_response_data.update(str(api_response_formatted))
+
+          except Exception as error:
+            sg.popup_error(f"Unable to retrieve data from API\n\n{error}")
 
       if event == "About":
-        sg.popup("This application is awesome!")
+        sg.popup("GITHUB: https://github.com/arthurfy/support-app")
 
       if event == sg.WIN_CLOSED or event == 'Cancel' or event == 'Exit':  # if user closes window or clicks cancel
         break

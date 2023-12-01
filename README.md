@@ -1,5 +1,10 @@
 # About The Project
-template desktop application with pandas, sql, pysimplegui
+support application
+
+# Features
+- basic authenication system
+- starter customer top products dashboard
+- simple api request
 
 # Built With
 pandas
@@ -8,10 +13,5 @@ pysimplegui
 sqlite
 requests
 
-# Features
-- basic authentication system
-  
 # Usage
-python desktop application
-
-
+Select functions from the top menu

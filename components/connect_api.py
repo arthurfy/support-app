@@ -1,7 +1,5 @@
 import sys
 import os
-import logging
-import shutil
 import datetime
 import json
 import requests
@@ -9,17 +7,19 @@ import ssl
 import hashlib
 import pandas as pd
 from urllib3 import poolmanager
-
-from components import common
+try:
+  from components import common
+except ModuleNotFoundError as error:
+  print(f"{error} from connect_api.py")
+  sys.path.append(os.getcwd())
+  from components import common
 
 logger = common.logger
 '''
-import API module
+Making requests against APIs
 '''
 
-
 class TLSAdapter(requests.adapters.HTTPAdapter):
-
   def init_poolmanager(self, connections, maxsize, block=False):
     """Create and initialize the urllib3 PoolManager."""
     ctx = ssl.create_default_context()
@@ -30,208 +30,157 @@ class TLSAdapter(requests.adapters.HTTPAdapter):
                                                ssl_version=ssl.PROTOCOL_TLS,
                                                ssl_context=ctx)
 
-
 def api_request(url: str,
-                headers: dict,
+                headers: dict = None,
                 method: str = None,
+                request_body = None,
+                parameters: dict = None,
                 tls: bool = False,
-                request_body=None,
-                params: dict = None) -> pd.DataFrame:
+                api_key : str = None,
+                log_response : bool = False) -> pd.DataFrame:
+  
   '''
-    create an api request and return a repsonse\n\n
+  create an api request and return a repsonse
 
-    params =  form the query string in the URL\n
-    request_body = is used to fill the body of a request (together with files 
-    '''
-  # check if url is none
+  PARAMETERS
+  ----------
+  url : str
+  headers : dict
+  method : str
+  tls : bool
+  request_body : API specific
+  params : dict
+
+  RETURN
+  ------
+  response : api response data
+  '''
+  # Check if url is none
   if url is None:
     logger.error("The url is None")
     raise Exception("The url is None")
 
-  logger.info(f"API REQUEST URL: {url}")
+  logger.info(f"api request - url - {url}")
 
-  # check if headers is none:
+  # Check if headers is none:
   if headers is None:
-    logger.error("The headers is None")
-    raise Exception("The headers is None")
+    headers = {
+      "Content-Type": "application/json",
+    }
 
-  logger.info(f"API REQUEST HEADERS: {headers}")
+  logger.info(f"api request - headers - {headers}")
 
-  if method is None:
-    method = "GET"
+  # Check api key
+  if api_key is not None:
+    headers.update({"Authorization": f"Bearer {api_key}"})
+    logger.info(f"api request - api key - true")
 
   # Create session
   session = requests.session()
 
-  # check tls
+  # Check tls
   if tls:
     session.mount('https://', TLSAdapter())
 
-  if method == "GET":
-    # GET request
-    response = session.get(url,
-                           headers=headers,
-                           data=request_body,
-                           params=params)
-  elif method == "POST":
-    # POST request
-    response = session.post(url,
-                            headers=headers,
-                            data=request_body,
-                            params=params)
-  else:
-    # Default to GET request
-    response = session.get(url,
-                           headers=headers,
-                           data=request_body,
-                           params=params)
-
-  # if status code is not 200 raise an error
-  if response.status_code != 200:
-    raise Exception("API request failed: {}".format(response.status_code))
-
-  logger.info("The response is 200 okay")
-
-  # log the repsonse
-  pretty_response = json.dumps(response.json(), indent=4, sort_keys=True)
-  logger.info("The response is: {}".format(pretty_response))
-
-  return response
-
-
-def api_response_to_dataframe(
-    response: requests.models.Response) -> pd.DataFrame:
-  '''
-  convert a api repsonse to a dataframe
-  '''
-
-  # check if response is none
-  if response is None:
-    logger.error("The response is None")
-    raise Exception("The response is None")
-
-  # convert reponse to dataframe
-  df = pd.DataFrame(response.json())
-
-  return None if df.empty else df
-
-
-def api_standard(api_key: str = None) -> dict:
-  '''
-    create parameters for a standard api request
-    '''
-
-  headers = {
-      "Content-Type": "application/json",
-  }
-
-  # add api key to headers
-  if api_key is not None:
-    headers.update({"Authorization": f"Bearer {api_key}"})
-
-  return headers
-
-
-def api_request(url: str,
-                headers: dict,
-                method: str = None,
-                tls: bool = False,
-                request_body=None,
-                params: dict = None) -> pd.DataFrame:
-  '''
-    create an api request and return a repsonse\n\n
-
-    params =  form the query string in the URL\n
-    request_body = is used to fill the body of a request (together with files 
-    '''
-  # check if url is none
-  if url is None:
-    logger.error("The url is None")
-    raise Exception("The url is None")
-
-  logger.info(f"API REQUEST URL: {url}")
-
-  # check if headers is none:
-  if headers is None:
-    logger.error("The headers is None")
-    raise Exception("The headers is None")
-
-  logger.info(f"API REQUEST HEADERS: {headers}")
-
+  # Check method
   if method is None:
     method = "GET"
 
-  # Create session
-  session = requests.session()
+  logger.info(f"api request - method - {method}")
 
-  # check tls
-  if tls:
-    session.mount('https://', TLSAdapter())
+  if method == None:
+    method = "GET"
 
   if method == "GET":
-    # GET request
+    # GET method: retrieves information or data from a specified resource.
     response = session.get(url,
                            headers=headers,
                            data=request_body,
-                           params=params)
+                           params=parameters)
+
   elif method == "POST":
-    # POST request
+    # POST method: submits data to be processed to a specified resource.
     response = session.post(url,
                             headers=headers,
                             data=request_body,
-                            params=params)
+                            params=parameters)
+    
+  elif method == "PUT": 
+    # PUT method: updates a specified resource with new data.
+    logger.info(f"api request - method - {method} - not configured")
+    raise ValueError(f"api method {method} not configured")
+
+  elif method == "DELETE":
+    # DELETE method: deletes a specified resource.
+    logger.info(f"api request - method - {method} - not configured")
+    raise ValueError(f"api method {method} not configured")
+
+  elif method == "PATCH":
+    # PATCH method: partially updates a specified resource.
+    logger.info(f"api request - method - {method} - not configured")
+    raise ValueError(f"api method {method} not configured")
+
   else:
-    # Default to GET request
-    response = session.get(url,
-                           headers=headers,
-                           data=request_body,
-                           params=params)
+    logger.info(f"api request - method - {method} - not configured")
+    raise ValueError(f"api method {method} not configured")
 
-  # if status code is not 200 raise an error
+
+  # Check status code
   if response.status_code != 200:
-    raise Exception("API request failed: {}".format(response.status_code))
+    response_status_error = "API request failed: {}".format(response.status_code)
+    logger.error(response_status_error)
+    raise Exception(response_status_error)
 
-  logger.info("The response is 200 okay")
+  logger.info(f"api request - response - okay")
 
-  # log the repsonse
-  pretty_response = json.dumps(response.json(), indent=4, sort_keys=True)
-  logger.info("The response is: {}".format(pretty_response))
+  # Check response
+  if log_response == True:
+    pretty_response = json.dumps(response.json(), indent=4, sort_keys=True)
+    logger.info("The response is: {}".format(pretty_response))
 
-  return response
+  return None if response.status_code != 200 else response
 
-
-def api_response_to_dataframe(
-    response: requests.models.Response) -> pd.DataFrame:
+def api_response_converter(
+    response: requests.models.Response, format:str):
   '''
-    convert a api repsonse to a dataframe
-    '''
+  convert api repsonse
+
+  PARAMETERS
+  ----------
+  response : api response data
+
+  RETURN
+  ------
+  dataframe
+  json
+
+  '''
 
   # check if response is none
   if response is None:
-    logger.error("The response is None")
-    raise Exception("The response is None")
+    error_message = "api converted - response is None"
+    logger.error(error_message)
+    raise Exception(error_message)
+  
+  # check response status
+  if response.status_code != 200:
+    error_message = f"api converted - response code - {response.status_code}"
+    logger.error(error_message)
+    raise Exception(error_message)
+  
+  format = format.lower()
 
-  # convert reponse to dataframe
-  df = pd.DataFrame(response.json())
+  if format == "json":
+    # convert reponse to json
+    json = response.json()
+    return None if len(json) == 0 else json
 
-  return None if df.empty else df
+  if format == "df":
+    # convert reponse to dataframe
+    df = pd.DataFrame(response.json())
+    return None if df.empty else df
 
-
-def api_standard(api_key: str = None) -> dict:
-  '''
-    create parameters for a standard api request
-    '''
-
-  headers = {
-      "Content-Type": "application/json",
-  }
-
-  # add api key to headers
-  if api_key is not None:
-    headers.update({"Authorization": f"Bearer {api_key}"})
-
-  return headers
-
+  return None
 
 def api_marvel(marvel_public_api_key: str,
                marvel_private_api_key: str) -> dict:
@@ -265,6 +214,12 @@ def api_marvel(marvel_public_api_key: str,
 
   return headers, params
 
-
 if __name__ == "__main__":
+
+  # API TESTING
+  placeholder_api = "https://jsonplaceholder.typicode.com/posts"
+  response = api_request(placeholder_api)
+  response_converted = api_response_converter(response, "df")
+  print("Response Type: ", type(response_converted))
   pass
+

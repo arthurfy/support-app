@@ -11,7 +11,6 @@ except ModuleNotFoundError:
   from components import import_csv_to_dataframe
   from components import logger, CUSTOMERS, ORDERS, ORDER_DETAILS, PRODUCTS
 
-
 def customer_orders() -> pd.DataFrame:
   '''
   join customer and order data
@@ -72,7 +71,6 @@ def customer_orders() -> pd.DataFrame:
 
   return customers_orders
 
-
 def dash_products(customer_orders: pd.DataFrame) -> pd.DataFrame:
   '''
   filter top products from customer orders
@@ -90,13 +88,11 @@ def dash_products(customer_orders: pd.DataFrame) -> pd.DataFrame:
 
   return products
 
-
 def dash_orders():
   '''
   filter order details from customer orders
   '''
   pass
-
 
 def dash_customers():
   '''
@@ -104,10 +100,7 @@ def dash_customers():
   '''
   pass
 
-
 if __name__ == "__main__":
   pass
 
-  customer_orders = customer_orders()
 
-  dash_products(customer_orders)
