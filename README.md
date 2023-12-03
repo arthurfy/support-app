@@ -2,11 +2,11 @@
 support application
 
 # Features
-V0.1.0
+# V0.1.0
 - basic authenication system
 - starter customer top products dashboard
 - simple api request
-V0.2.0
+# V0.2.0
 - api response data table
 - api response data export to excel(.xlsx)
 
