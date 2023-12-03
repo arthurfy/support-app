@@ -6,6 +6,7 @@ import requests
 import ssl
 import hashlib
 import pandas as pd
+import json
 from urllib3 import poolmanager
 try:
   from components import common
@@ -172,8 +173,8 @@ def api_response_converter(
 
   if format == "json":
     # convert reponse to json
-    json = response.json()
-    return None if len(json) == 0 else json
+    json_format = response.json()
+    return None if len(json_format) == 0 else json_format
 
   if format == "df":
     # convert reponse to dataframe
@@ -219,7 +220,9 @@ if __name__ == "__main__":
   # API TESTING
   placeholder_api = "https://jsonplaceholder.typicode.com/posts"
   response = api_request(placeholder_api)
-  response_converted = api_response_converter(response, "df")
+  response_converted = api_response_converter(response, "json")
   print("Response Type: ", type(response_converted))
+  print(response_converted[0])
+  print(type(response_converted[0]))
   pass
 

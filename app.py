@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 import PySimpleGUI as sg
 from pandasql import sqldf
 from datetime import datetime, timedelta
@@ -66,6 +67,15 @@ def app():
       """
       return sg.pin(sg.Column(layout, key=key, visible=visible))
 
+    def new_window(window, table_options):
+      if window is not None:
+          window.close()
+      layout = [
+          [sg.Button('Replace!'),
+          sg.Table(**table_options, key="-TABLE-"),]
+      ]
+      return sg.Window('Table', layout, finalize=True)
+
     menu_right_click = ['&Right', ['&Copy', '&Paste', '&Properties']]
 
     main_menu = [['&File', ['&Exit']], ['&Function', ['&Customers','API']],
@@ -96,101 +106,133 @@ def app():
       event, values = window.read()
 
       '''
-      LOGIN SCREEN
+      EVENT PROCESSES
       '''
+
       if event == "-LOGIN-BUTTON-":
-        username = values["-LOGIN-USERNAME-"]
-        password = values["-LOGIN-PASSWORD-"]
 
-        if username != "" and password != "":
-          if connect_login.login(username, password):
+        '''
+        FUNCTION - LOGIN
+        '''
 
-            window['-LAYOUT-HOME-'].update(visible=True)
-            window['-LAYOUT-LOGIN-'].update(visible=False)
+        try:
 
-            # if successful set logged in to true
-            connect_login.logged_in = True
+          username = values["-LOGIN-USERNAME-"]
+          password = values["-LOGIN-PASSWORD-"]
 
+          if username != "" and password != "":
+            if connect_login.login(username, password):
+
+              window['-LAYOUT-HOME-'].update(visible=True)
+              window['-LAYOUT-LOGIN-'].update(visible=False)
+
+              # if successful set logged in to true
+              connect_login.logged_in = True
+
+            else:
+              sg.popup_ok("The username or password is incorrect")
           else:
-            sg.popup_ok("The username or password is incorrect")
-        else:
-          sg.popup_ok("The username or password cannot be blank")
+            sg.popup_ok("The username or password cannot be blank")
+        
+        except Exception as error:
+          sg.popup_error(f"Unable to use LOGIN function due to an error.\n\n{error}")
 
-        if event == "About":
-          sg.popup("This is awesome!")
+      if event == "-FUNCTION-API-REQUEST-BUTTON-": 
+        logger.info(f"{event}")
+        
+        try:
+          user_api_url = values['-FUNCTION-API-REQUEST-URL-']
+
+          if user_api_url == None:
+            continue
+
+          if user_api_url == "":
+            continue
+
+          api_response = connect_api.api_request(user_api_url)
+          api_response_json = connect_api.api_response_converter(api_response, "json")
+
+          api_response_df = connect_api.api_response_converter(api_response, 'df')
+
+          if api_response_df.empty:
+            error_message = "api response dataframe is empty"
+            raise ValueError(error_message)
+          
+          app_gui.open_window_with_api_response(api_response_df)
+
+        except Exception as error:
+          sg.popup_error(f"Unable to retrieve data from API\n\n{error}")
 
       '''
-      FUNCTION - CUSTOMERS
+      EVENT MENUS
       '''
+
       if event == "Customers":
         logger.info(f"{event}")
+        '''
+        FUNCTION - CUSTOMERS
+        '''
 
-        logged_in = login_check()
+        try:
 
-        if logged_in:
+          logged_in = login_check()
 
-          # hide views
-          window['-LAYOUT-HOME-'].update(visible=False)
-          window['-LAYOUT-LOGIN-'].update(visible=False)
-          window['-LAYOUT-API-'].update(visible=False)
+          if logged_in:
 
-          # show views
-          window['-LAYOUT-CUSTOMER-'].update(visible=True)
+            # hide views
+            window['-LAYOUT-HOME-'].update(visible=False)
+            window['-LAYOUT-LOGIN-'].update(visible=False)
+            window['-LAYOUT-API-'].update(visible=False)
 
-          # load customer order data
-          customer_orders = prep_data.customer_orders()
+            # show views
+            window['-LAYOUT-CUSTOMER-'].update(visible=True)
 
-          # calculate top products
-          products = prep_data.dash_products(customer_orders)
+            # load customer order data
+            customer_orders = prep_data.customer_orders()
 
-          product_ids = products["ProductID"].tolist()
-          orders = products["Orders"].tolist()
+            # calculate top products
+            products = prep_data.dash_products(customer_orders)
 
-          visualise_data.draw_figure(
-              window['-CUSTOMERS-CANVAS-'].TKCanvas,
-              visualise_data.create_plot_graph(product_ids, orders,
-                                                  "Top Products", "Product ID", "Orders"))
+            product_ids = products["ProductID"].tolist()
+            orders = products["Orders"].tolist()
+
+            visualise_data.draw_figure(
+                window['-CUSTOMERS-CANVAS-'].TKCanvas,
+                visualise_data.create_plot_graph(product_ids, orders,
+                                                    "Top Products", "Product ID", "Orders"))
+            
+        except Exception as error:
+          sg.popup_error(f"Unable to use CUSTOMER function due to an error.\n\n{error}")
           
       if event == "API":
         logger.info(f"{event}")
         '''
         FUNCTION - API
         '''
+        try:
 
-        logged_in = login_check()
+          logged_in = login_check()
 
-        if logged_in:
+          if logged_in:
 
-          # hide views
-          window['-LAYOUT-HOME-'].update(visible=False)
-          window['-LAYOUT-LOGIN-'].update(visible=False)
-          window['-LAYOUT-CUSTOMER-'].update(visible=False)
+            # hide views
+            window['-LAYOUT-HOME-'].update(visible=False)
+            window['-LAYOUT-LOGIN-'].update(visible=False)
+            window['-LAYOUT-CUSTOMER-'].update(visible=False)
 
-          # show views
-          window['-LAYOUT-API-'].update(visible=True)
-
-      if event == "-FUNCTION-API-REQUEST-BUTTON-": 
-          logger.info(f"{event}")
+            # show views
+            window['-LAYOUT-API-'].update(visible=True)
           
-          try:
-            user_api_url = values['-FUNCTION-API-REQUEST-URL-']
-
-            if user_api_url == None:
-              continue
-
-            if user_api_url == "":
-              continue
-
-            api_response = connect_api.api_request(user_api_url)
-            api_response_formatted = connect_api.api_response_converter(api_response, "json")
-
-            app_gui.function_api_response_data.update(str(api_response_formatted))
-
-          except Exception as error:
-            sg.popup_error(f"Unable to retrieve data from API\n\n{error}")
+        except Exception as error:
+          sg.popup_error(f"Unable to use API function due to an error.\n\n{error}")
 
       if event == "About":
-        sg.popup("GITHUB: https://github.com/arthurfy/support-app")
+        try:
+
+          sg.popup("GITHUB: https://github.com/arthurfy/support-app")
+
+        except Exception as error:
+          sg.popup_error(f"Unable to use ABOUT function due to an error.\n\n{error}")
 
       if event == sg.WIN_CLOSED or event == 'Cancel' or event == 'Exit':  # if user closes window or clicks cancel
         break
